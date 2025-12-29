@@ -1,9 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useState, type ReactNode } from "react";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -40,7 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(() => checkAuth());
 
   const login = (password: string): boolean => {
-    const correctPassword = import.meta.env.VITE_ADMIN_PASSWORD || "admin123";
+    const correctPassword = import.meta.env.VITE_ADMIN_PASSWORD;
 
     if (password === correctPassword) {
       const authData = {
