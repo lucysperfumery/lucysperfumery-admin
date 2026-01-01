@@ -1,0 +1,32 @@
+export const categories = [
+  "Air Refresher",
+  "Body Splashes",
+  "Body Spray",
+  "Cosmetics",
+  "Designer Perfumes",
+  "Diffusers",
+  "Fragrance World",
+  "Mini Perfumes",
+  "Oil Perfumes",
+  "Perfume Gift Sets",
+  "Perfume Combos",
+  "Smart Collections",
+];
+
+export const brands = [
+  "Afnan",
+  "Armaf",
+  "Dove Sure",
+  "Efolia",
+  "French Avenue",
+  "Frank Oliver",
+  "Khadlaj",
+  "Lattafa",
+  "L'affair",
+  "Maison Alhambra",
+  "Marque Collections",
+  "Paris Corner",
+  "Rayhaan",
+  "Rassasi",
+  "Riffs",
+];

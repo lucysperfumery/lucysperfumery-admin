@@ -20,11 +20,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
 import { toast } from "sonner";
 import productService from "@/services/productService";
 import type { Product, ProductFormData } from "@/types/product";
+import { categories, brands } from "@/lib/consts";
 
 export default function Products() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -191,9 +199,7 @@ export default function Products() {
                       className="w-20 h-20 object-cover rounded-lg shrink-0"
                     />
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold truncate">
-                        {product.name}
-                      </h3>
+                      <h3 className="font-semibold truncate">{product.name}</h3>
                       <p className="text-sm text-neutral-600 dark:text-neutral-400">
                         {product.brand}
                       </p>
@@ -332,47 +338,32 @@ export default function Products() {
               Fill in the product details below
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-6 mt-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1">
-                <Label htmlFor="name">Name</Label>
+              {/* Product Name */}
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="name">Product Name</Label>
                 <Input
                   id="name"
+                  placeholder="Enter product name"
                   value={formData.name}
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
+                  className="w-full"
                   required
                 />
               </div>
-              <div className="flex flex-col gap-1">
-                <Label htmlFor="brand">Brand</Label>
-                <Input
-                  id="brand"
-                  value={formData.brand}
-                  onChange={(e) =>
-                    setFormData({ ...formData, brand: e.target.value })
-                  }
-                  required
-                />
-              </div>
-              <div className="flex flex-col gap-1">
-                <Label htmlFor="category">Category</Label>
-                <Input
-                  id="category"
-                  value={formData.category}
-                  onChange={(e) =>
-                    setFormData({ ...formData, category: e.target.value })
-                  }
-                  required
-                />
-              </div>
-              <div className="flex flex-col gap-1">
+
+              {/* Price */}
+              <div className="flex flex-col gap-2">
                 <Label htmlFor="price">Price (GH₵)</Label>
                 <Input
                   id="price"
                   type="number"
-                  step="0.01"
+                  step="0.1"
+                  min="0"
+                  placeholder="0.00"
                   value={formData.price}
                   onChange={(e) =>
                     setFormData({
@@ -383,11 +374,61 @@ export default function Products() {
                   required
                 />
               </div>
-              <div className="flex flex-col gap-1">
-                <Label htmlFor="stock">Stock</Label>
+
+              {/* Brand */}
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="brand">Brand</Label>
+                <Select
+                  value={formData.brand}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, brand: value })
+                  }
+                  required
+                >
+                  <SelectTrigger id="brand" className="w-full">
+                    <SelectValue placeholder="Select a brand" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {brands.map((brand) => (
+                      <SelectItem key={brand} value={brand}>
+                        {brand}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Category */}
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="category">Category</Label>
+                <Select
+                  value={formData.category}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, category: value })
+                  }
+                  required
+                >
+                  <SelectTrigger id="category" className="w-full">
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Stock */}
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="stock">Stock Quantity</Label>
                 <Input
                   id="stock"
                   type="number"
+                  min="0"
+                  placeholder="0"
                   value={formData.stock}
                   onChange={(e) =>
                     setFormData({
@@ -398,41 +439,45 @@ export default function Products() {
                   required
                 />
               </div>
-              <div className="sm:col-span-2">
-                <Label htmlFor="image">Product Image</Label>
-                <div className="mt-2 space-y-3">
-                  <Input
-                    id="image"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="cursor-pointer"
-                  />
-                  {imagePreview && (
-                    <div className="relative w-32 h-32 border rounded-lg overflow-hidden">
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
             </div>
-            <div>
+
+            {/* Product Image */}
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="image">Product Image</Label>
+              <Input
+                id="image"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="cursor-pointer"
+              />
+              {imagePreview && (
+                <div className="relative w-32 h-32 border rounded-lg overflow-hidden bg-neutral-50 dark:bg-neutral-800">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Description */}
+            <div className="flex flex-col gap-2">
               <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
+                placeholder="Enter product description"
                 value={formData.description}
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
-                rows={3}
+                rows={4}
                 required
               />
             </div>
-            <DialogFooter>
+
+            <DialogFooter className="gap-2">
               <Button
                 type="button"
                 variant="outline"
