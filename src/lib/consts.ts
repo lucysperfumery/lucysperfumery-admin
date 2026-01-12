@@ -11,9 +11,6 @@ export const categories = [
   "Perfume Gift Sets",
   "Perfume Combos",
   "Smart Collections",
-];
-
-export const brands = [
   "Afnan",
   "Armaf",
   "Dove Sure",

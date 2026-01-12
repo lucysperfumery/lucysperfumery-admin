@@ -29,7 +29,6 @@ class ProductService {
       formData.append("description", data.description);
       formData.append("price", data.price.toString());
       formData.append("category", data.category);
-      formData.append("brand", data.brand);
       formData.append("stock", data.stock.toString());
 
       // Append image file if provided
@@ -61,7 +60,6 @@ class ProductService {
       if (data.price !== undefined)
         formData.append("price", data.price.toString());
       if (data.category) formData.append("category", data.category);
-      if (data.brand) formData.append("brand", data.brand);
       if (data.stock !== undefined)
         formData.append("stock", data.stock.toString());
 

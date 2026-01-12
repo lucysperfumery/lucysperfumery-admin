@@ -4,7 +4,6 @@ export interface Product {
   description: string;
   price: number;
   category: string;
-  brand: string;
   image: string;
   stock: number;
   isActive: boolean;
@@ -17,7 +16,6 @@ export interface ProductFormData {
   description: string;
   price: number;
   category: string;
-  brand: string;
   image: string;
   stock: number;
 }

@@ -32,7 +32,7 @@ import { Plus, Pencil, Trash2, Search } from "lucide-react";
 import { toast } from "sonner";
 import productService from "@/services/productService";
 import type { Product, ProductFormData } from "@/types/product";
-import { categories, brands } from "@/lib/consts";
+import { categories } from "@/lib/consts";
 
 export default function Products() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -47,7 +47,6 @@ export default function Products() {
     description: "",
     price: 0,
     category: "",
-    brand: "",
     image: "",
     stock: 0,
   });
@@ -76,7 +75,6 @@ export default function Products() {
         description: product.description,
         price: product.price,
         category: product.category,
-        brand: product.brand,
         image: product.image,
         stock: product.stock,
       });
@@ -88,7 +86,6 @@ export default function Products() {
         description: "",
         price: 0,
         category: "",
-        brand: "",
         image: "",
         stock: 0,
       });
@@ -156,7 +153,6 @@ export default function Products() {
   const filteredProducts = products.filter(
     (p) =>
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -200,9 +196,6 @@ export default function Products() {
                     />
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold truncate">{product.name}</h3>
-                      <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                        {product.brand}
-                      </p>
                       <p className="text-xs text-neutral-500 dark:text-neutral-500">
                         {product.category}
                       </p>
@@ -260,9 +253,6 @@ export default function Products() {
                     <TableHead className="w-16">Image</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead className="hidden lg:table-cell">
-                      Brand
-                    </TableHead>
-                    <TableHead className="hidden lg:table-cell">
                       Category
                     </TableHead>
                     <TableHead>Price</TableHead>
@@ -282,9 +272,6 @@ export default function Products() {
                       </TableCell>
                       <TableCell className="font-medium">
                         {product.name}
-                      </TableCell>
-                      <TableCell className="hidden lg:table-cell">
-                        {product.brand}
                       </TableCell>
                       <TableCell className="hidden lg:table-cell">
                         {product.category}
@@ -373,29 +360,6 @@ export default function Products() {
                   }
                   required
                 />
-              </div>
-
-              {/* Brand */}
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="brand">Brand</Label>
-                <Select
-                  value={formData.brand}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, brand: value })
-                  }
-                  required
-                >
-                  <SelectTrigger id="brand" className="w-full">
-                    <SelectValue placeholder="Select a brand" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {brands.map((brand) => (
-                      <SelectItem key={brand} value={brand}>
-                        {brand}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
 
               {/* Category */}
