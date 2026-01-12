@@ -26,4 +26,8 @@ export const categories = [
   "Rayhaan",
   "Rassasi",
   "Riffs",
+  "Other",
+  "Clone",
+  "Perfumes",
+  "Colorful Bomb",
 ];
