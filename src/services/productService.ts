@@ -31,6 +31,11 @@ class ProductService {
       formData.append("category", data.category);
       formData.append("stock", data.stock.toString());
 
+      // Append options as JSON string if provided
+      if (data.options && data.options.length > 0) {
+        formData.append("options", JSON.stringify(data.options));
+      }
+
       // Append image file if provided
       if (imageFile) {
         formData.append("image", imageFile);
@@ -62,6 +67,11 @@ class ProductService {
       if (data.category) formData.append("category", data.category);
       if (data.stock !== undefined)
         formData.append("stock", data.stock.toString());
+
+      // Append options as JSON string if provided
+      if (data.options !== undefined) {
+        formData.append("options", JSON.stringify(data.options));
+      }
 
       // Append image file if provided
       if (imageFile) {

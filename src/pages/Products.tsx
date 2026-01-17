@@ -31,7 +31,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
 import { toast } from "sonner";
 import productService from "@/services/productService";
-import type { Product, ProductFormData } from "@/types/product";
+import type { Product, ProductFormData, ProductOption } from "@/types/product";
 import { categories } from "@/lib/consts";
 
 export default function Products() {
@@ -42,6 +42,7 @@ export default function Products() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
+  const [hasOptions, setHasOptions] = useState(false);
   const [formData, setFormData] = useState<ProductFormData>({
     name: "",
     description: "",
@@ -49,6 +50,7 @@ export default function Products() {
     category: "",
     image: "",
     stock: 0,
+    options: [],
   });
 
   useEffect(() => {
@@ -70,6 +72,10 @@ export default function Products() {
   const handleOpenDialog = (product?: Product) => {
     if (product) {
       setEditingProduct(product);
+      const productHasOptions = !!(
+        product.options && product.options.length > 0
+      );
+      setHasOptions(productHasOptions);
       setFormData({
         name: product.name,
         description: product.description,
@@ -77,10 +83,12 @@ export default function Products() {
         category: product.category,
         image: product.image,
         stock: product.stock,
+        options: product.options || [],
       });
       setImagePreview(product.image);
     } else {
       setEditingProduct(null);
+      setHasOptions(false);
       setFormData({
         name: "",
         description: "",
@@ -88,11 +96,47 @@ export default function Products() {
         category: "",
         image: "",
         stock: 0,
+        options: [],
       });
       setImagePreview("");
     }
     setImageFile(null);
     setIsDialogOpen(true);
+  };
+
+  const addOption = () => {
+    setFormData({
+      ...formData,
+      options: [
+        ...(formData.options || []),
+        { name: "", price: 0, stock: 0, sku: "", isActive: true },
+      ],
+    });
+  };
+
+  const removeOption = (index: number) => {
+    const newOptions = [...(formData.options || [])];
+    newOptions.splice(index, 1);
+    setFormData({ ...formData, options: newOptions });
+  };
+
+  const updateOption = (
+    index: number,
+    field: keyof ProductOption,
+    value: string | number | boolean
+  ) => {
+    const newOptions = [...(formData.options || [])];
+    newOptions[index] = { ...newOptions[index], [field]: value };
+    setFormData({ ...formData, options: newOptions });
+  };
+
+  const toggleHasOptions = (enabled: boolean) => {
+    setHasOptions(enabled);
+    if (!enabled) {
+      setFormData({ ...formData, options: [] });
+    } else if (!formData.options || formData.options.length === 0) {
+      addOption();
+    }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -115,6 +159,30 @@ export default function Products() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate options if enabled
+    if (hasOptions) {
+      if (!formData.options || formData.options.length === 0) {
+        toast.error("Please add at least one option");
+        return;
+      }
+
+      for (const option of formData.options) {
+        if (!option.name || !option.name.trim()) {
+          toast.error("All options must have a name");
+          return;
+        }
+        if (!option.price || option.price <= 0) {
+          toast.error("All options must have a price greater than 0");
+          return;
+        }
+        if (option.stock === undefined || option.stock < 0) {
+          toast.error("All options must have a valid stock quantity");
+          return;
+        }
+      }
+    }
+
     try {
       setLoading(true);
 
@@ -199,6 +267,12 @@ export default function Products() {
                       <p className="text-xs text-neutral-500 dark:text-neutral-500">
                         {product.category}
                       </p>
+                      {(product.hasOptions ||
+                        (product.options && product.options.length > 0)) && (
+                        <Badge variant="secondary" className="mt-1 text-xs">
+                          {product.options?.length} Options
+                        </Badge>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center justify-between pt-2 border-t">
@@ -207,7 +281,14 @@ export default function Products() {
                         Price
                       </p>
                       <p className="font-semibold text-lg">
-                        GH₵{product.price.toFixed(2)}
+                        {product.hasOptions ||
+                        (product.options && product.options.length > 0) ? (
+                          <span className="text-sm text-neutral-500">
+                            Varied
+                          </span>
+                        ) : (
+                          `GH₵${product.price.toFixed(2)}`
+                        )}
                       </p>
                     </div>
                     <div>
@@ -215,9 +296,25 @@ export default function Products() {
                         Stock
                       </p>
                       <Badge
-                        variant={product.stock > 5 ? "default" : "destructive"}
+                        variant={
+                          (product.hasOptions ||
+                          (product.options && product.options.length > 0)
+                            ? product.options?.reduce(
+                                (sum, opt) => sum + opt.stock,
+                                0
+                              ) || 0
+                            : product.stock) > 5
+                            ? "default"
+                            : "destructive"
+                        }
                       >
-                        {product.stock}
+                        {product.hasOptions ||
+                        (product.options && product.options.length > 0)
+                          ? product.options?.reduce(
+                              (sum, opt) => sum + opt.stock,
+                              0
+                            ) || 0
+                          : product.stock}
                       </Badge>
                     </div>
                   </div>
@@ -257,6 +354,9 @@ export default function Products() {
                     </TableHead>
                     <TableHead>Price</TableHead>
                     <TableHead>Stock</TableHead>
+                    <TableHead className="hidden xl:table-cell">
+                      Options
+                    </TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -276,15 +376,40 @@ export default function Products() {
                       <TableCell className="hidden lg:table-cell">
                         {product.category}
                       </TableCell>
-                      <TableCell>GH₵{product.price.toFixed(2)}</TableCell>
+                      <TableCell>
+                        {product.hasOptions ||
+                        (product.options && product.options.length > 0) ? (
+                          <span className="text-sm text-neutral-500">
+                            Varied
+                          </span>
+                        ) : (
+                          `GH₵${product.price.toFixed(2)}`
+                        )}
+                      </TableCell>
                       <TableCell>
                         <Badge
                           variant={
                             product.stock > 5 ? "default" : "destructive"
                           }
                         >
-                          {product.stock}
+                          {product.hasOptions ||
+                          (product.options && product.options.length > 0)
+                            ? product.options?.reduce(
+                                (sum, opt) => sum + opt.stock,
+                                0
+                              ) || 0
+                            : product.stock}
                         </Badge>
+                      </TableCell>
+                      <TableCell className="hidden xl:table-cell">
+                        {product.hasOptions ||
+                        (product.options && product.options.length > 0) ? (
+                          <Badge variant="secondary">
+                            {product.options?.length} Options
+                          </Badge>
+                        ) : (
+                          <span className="text-sm text-neutral-500">-</span>
+                        )}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
@@ -342,26 +467,6 @@ export default function Products() {
                 />
               </div>
 
-              {/* Price */}
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="price">Price (GH₵)</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  placeholder="0.00"
-                  value={formData.price}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      price: parseFloat(e.target.value),
-                    })
-                  }
-                  required
-                />
-              </div>
-
               {/* Category */}
               <div className="flex flex-col gap-2">
                 <Label htmlFor="category">Category</Label>
@@ -385,24 +490,184 @@ export default function Products() {
                 </Select>
               </div>
 
-              {/* Stock */}
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="stock">Stock Quantity</Label>
-                <Input
-                  id="stock"
-                  type="number"
-                  min="0"
-                  placeholder="0"
-                  value={formData.stock}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      stock: parseInt(e.target.value),
-                    })
-                  }
-                  required
-                />
+              {/* Conditional Price/Stock - only show if no options */}
+              {!hasOptions && (
+                <>
+                  {/* Price */}
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="price">Price (GH₵)</Label>
+                    <Input
+                      id="price"
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      placeholder="0.00"
+                      value={formData.price}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          price: parseFloat(e.target.value),
+                        })
+                      }
+                      required
+                    />
+                  </div>
+
+                  {/* Stock */}
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="stock">Stock Quantity</Label>
+                    <Input
+                      id="stock"
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      value={formData.stock}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          stock: parseInt(e.target.value),
+                        })
+                      }
+                      required
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Product Options Section */}
+            <div className="space-y-4 border-t pt-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label
+                    htmlFor="hasOptions"
+                    className="text-base font-semibold"
+                  >
+                    Product Options
+                  </Label>
+                  <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                    Add variants like sizes, volumes, or colors with individual
+                    pricing
+                  </p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="hasOptions"
+                    checked={hasOptions}
+                    onChange={(e) => toggleHasOptions(e.target.checked)}
+                    className="w-4 h-4 rounded border-neutral-300"
+                  />
+                  <Label htmlFor="hasOptions" className="cursor-pointer">
+                    Enable options
+                  </Label>
+                </div>
               </div>
+
+              {hasOptions && (
+                <div className="space-y-3">
+                  {(formData.options || []).map((option, index) => (
+                    <div
+                      key={index}
+                      className="border rounded-lg p-4 space-y-3 bg-neutral-50 dark:bg-neutral-900"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium">Option {index + 1}</h4>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeOption(index)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor={`option-name-${index}`}>
+                            Name <span className="text-destructive">*</span>
+                          </Label>
+                          <Input
+                            id={`option-name-${index}`}
+                            placeholder="e.g., 50ml, Large"
+                            value={option.name}
+                            onChange={(e) =>
+                              updateOption(index, "name", e.target.value)
+                            }
+                            required
+                          />
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor={`option-price-${index}`}>
+                            Price (GH₵){" "}
+                            <span className="text-destructive">*</span>
+                          </Label>
+                          <Input
+                            id={`option-price-${index}`}
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder="0.00"
+                            value={option.price}
+                            onChange={(e) =>
+                              updateOption(
+                                index,
+                                "price",
+                                parseFloat(e.target.value)
+                              )
+                            }
+                            required
+                          />
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor={`option-stock-${index}`}>
+                            Stock <span className="text-destructive">*</span>
+                          </Label>
+                          <Input
+                            id={`option-stock-${index}`}
+                            type="number"
+                            min="0"
+                            placeholder="0"
+                            value={option.stock}
+                            onChange={(e) =>
+                              updateOption(
+                                index,
+                                "stock",
+                                parseInt(e.target.value)
+                              )
+                            }
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      {/* <div className="flex flex-col gap-2">
+                        <Label htmlFor={`option-sku-${index}`}>SKU (Optional)</Label>
+                        <Input
+                          id={`option-sku-${index}`}
+                          placeholder="e.g., PERF-50ML"
+                          value={option.sku || ""}
+                          onChange={(e) => updateOption(index, "sku", e.target.value)}
+                        />
+                      </div> */}
+                    </div>
+                  ))}
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={addOption}
+                    className="w-full"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Option
+                  </Button>
+                </div>
+              )}
             </div>
 
             {/* Product Image */}
