@@ -123,7 +123,7 @@ export default function Products() {
   const updateOption = (
     index: number,
     field: keyof ProductOption,
-    value: string | number | boolean
+    value: string | number | boolean,
   ) => {
     const newOptions = [...(formData.options || [])];
     newOptions[index] = { ...newOptions[index], [field]: value };
@@ -190,7 +190,7 @@ export default function Products() {
         await productService.update(
           editingProduct._id,
           formData,
-          imageFile || undefined
+          imageFile || undefined,
         );
         toast.success("Product updated successfully");
       } else {
@@ -221,7 +221,7 @@ export default function Products() {
   const filteredProducts = products.filter(
     (p) =>
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.category.toLowerCase().includes(searchQuery.toLowerCase())
+      p.category.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
@@ -301,7 +301,7 @@ export default function Products() {
                           (product.options && product.options.length > 0)
                             ? product.options?.reduce(
                                 (sum, opt) => sum + opt.stock,
-                                0
+                                0,
                               ) || 0
                             : product.stock) > 5
                             ? "default"
@@ -312,7 +312,7 @@ export default function Products() {
                         (product.options && product.options.length > 0)
                           ? product.options?.reduce(
                               (sum, opt) => sum + opt.stock,
-                              0
+                              0,
                             ) || 0
                           : product.stock}
                       </Badge>
@@ -396,7 +396,7 @@ export default function Products() {
                           (product.options && product.options.length > 0)
                             ? product.options?.reduce(
                                 (sum, opt) => sum + opt.stock,
-                                0
+                                0,
                               ) || 0
                             : product.stock}
                         </Badge>
@@ -481,11 +481,13 @@ export default function Products() {
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
+                    {categories
+                      .sort((a, b) => a.localeCompare(b))
+                      .map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -616,7 +618,7 @@ export default function Products() {
                               updateOption(
                                 index,
                                 "price",
-                                parseFloat(e.target.value)
+                                parseFloat(e.target.value),
                               )
                             }
                             required
@@ -637,7 +639,7 @@ export default function Products() {
                               updateOption(
                                 index,
                                 "stock",
-                                parseInt(e.target.value)
+                                parseInt(e.target.value),
                               )
                             }
                             required

@@ -48,4 +48,5 @@ export const categories = [
   "EOS Cream",
   "Men Splashes",
   "Atomizers",
+  "50ml Fragrance World",
 ];
