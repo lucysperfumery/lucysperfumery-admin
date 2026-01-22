@@ -1,6 +1,6 @@
 export const categories = [
+  "Al Haramain",
   "Air Refresher",
-  "Body Splashes",
   "Body Spray",
   "Cosmetics",
   "Designer Perfumes",
@@ -9,7 +9,6 @@ export const categories = [
   "Mini Perfumes",
   "Oil Perfumes",
   "Perfume Gift Sets",
-  "Perfume Combos",
   "Smart Collections",
   "Afnan",
   "Armaf",
@@ -26,7 +25,6 @@ export const categories = [
   "Rayhaan",
   "Rassasi",
   "Riffs",
-  "Other",
   "Clone",
   "Perfumes",
   "Colorful Bomb",
@@ -48,5 +46,5 @@ export const categories = [
   "EOS Cream",
   "Men Splashes",
   "Atomizers",
-  "50ml Fragrance World",
+  "Strong Perfumes",
 ];
