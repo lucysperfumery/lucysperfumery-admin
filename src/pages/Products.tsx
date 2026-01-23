@@ -28,7 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import { Plus, Pencil, Search, CheckCircle, XCircle, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import productService from "@/services/productService";
 import type { Product, ProductFormData, ProductOption } from "@/types/product";
@@ -206,15 +206,13 @@ export default function Products() {
     }
   };
 
-  const handleDelete = async (id: string, name: string) => {
-    if (confirm(`Delete "${name}"?`)) {
-      try {
-        await productService.delete(id);
-        toast.success("Product deleted");
-        fetchProducts();
-      } catch (error) {
-        toast.error("Failed to delete product");
-      }
+  const handleToggleActive = async (id: string, currentStatus: boolean) => {
+    try {
+      await productService.toggleActive(id, !currentStatus);
+      toast.success(currentStatus ? "Product deactivated" : "Product activated");
+      fetchProducts();
+    } catch (error) {
+      toast.error("Failed to update product status");
     }
   };
 
@@ -329,13 +327,22 @@ export default function Products() {
                       Edit
                     </Button>
                     <Button
-                      variant="outline"
+                      variant={product.isActive ? "outline" : "default"}
                       size="sm"
                       className="flex-1"
-                      onClick={() => handleDelete(product._id, product.name)}
+                      onClick={() => handleToggleActive(product._id, product.isActive)}
                     >
-                      <Trash2 className="w-4 h-4 mr-2 text-destructive" />
-                      Delete
+                      {product.isActive ? (
+                        <>
+                          <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
+                          Active
+                        </>
+                      ) : (
+                        <>
+                          <XCircle className="w-4 h-4 mr-2 text-gray-500" />
+                          Inactive
+                        </>
+                      )}
                     </Button>
                   </div>
                 </div>
@@ -424,10 +431,15 @@ export default function Products() {
                             variant="ghost"
                             size="sm"
                             onClick={() =>
-                              handleDelete(product._id, product.name)
+                              handleToggleActive(product._id, product.isActive)
                             }
+                            title={product.isActive ? "Deactivate product" : "Activate product"}
                           >
-                            <Trash2 className="w-4 h-4 text-destructive" />
+                            {product.isActive ? (
+                              <CheckCircle className="w-4 h-4 text-green-600" />
+                            ) : (
+                              <XCircle className="w-4 h-4 text-gray-500" />
+                            )}
                           </Button>
                         </div>
                       </TableCell>

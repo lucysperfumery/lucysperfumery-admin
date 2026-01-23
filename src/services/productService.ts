@@ -87,6 +87,17 @@ class ProductService {
     }
   }
 
+  async toggleActive(id: string, isActive: boolean): Promise<Product> {
+    try {
+      const response = await api.patch(`/api/products/${id}/toggle-active`, {
+        isActive,
+      });
+      return response.data.data;
+    } catch (error) {
+      throw new Error(handleApiError(error));
+    }
+  }
+
   async delete(id: string): Promise<void> {
     try {
       await api.delete(`/api/products/${id}`);
