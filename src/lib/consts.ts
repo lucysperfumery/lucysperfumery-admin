@@ -47,4 +47,6 @@ export const categories = [
   "Men Splashes",
   "Atomizers",
   "Strong Perfumes",
+  "Zimaya",
+  "Gulf Orchid",
 ];
